@@ -1,11 +1,19 @@
-#Adversarial Text Attack in Arabic Sentiment Analysis
-##Overview
-This project implements an adversarial attack on Arabic sentiment analysis models by generating adversarial text examples using visually similar Arabic characters. The attack modifies key words in a sentence to evaluate the robustness of sentiment classifiers.
+# Arabic Text Adversarial Attack
 
-Features
-Text Preprocessing: Cleans and tokenizes Arabic text.
-Sentiment Analysis: Uses a transformer-based model for sentiment prediction.
-Adversarial Attacks: Identifies the most vulnerable words and replaces them with visually similar alternatives.
-Evaluation: Measures sentiment score changes before and after the attack.
-Dependencies
-Ensure you have the following Python packages installed:
+This project implements an adversarial attack on Arabic text using NLP techniques. It leverages **transformers**, **NLTK**, **SentenceTransformers**, and **pandas** to manipulate and analyze text data. The main goal is to identify the most vulnerable words in a sentence and generate adversarial examples by substituting visually similar Arabic characters.
+
+## Features
+
+- **Text Cleaning**: Removes punctuation, emojis, stopwords, and noise from Arabic text.
+- **Word Tokenization**: Splits text into individual words.
+- **Most Important Word (MIW) Identification**: Finds the most influential words in a sentence.
+- **Adversarial Word Generation**: Replaces MIWs with visually similar Arabic characters.
+- **Sentiment Analysis**: Computes sentiment scores before and after attack.
+- **Attack Simulation**: Applies the adversarial attack step-by-step to analyze the impact.
+
+## Installation
+
+Before running the script, install the required dependencies:
+
+```bash
+pip install torch transformers pandas tqdm nltk sentence-transformers scikit-learn tensorflow huggingface-hub
