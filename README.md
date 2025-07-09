@@ -20,7 +20,7 @@ Before running the script, install the required dependencies:
 ```bash
 pip install torch transformers pandas tqdm nltk sentence-transformers scikit-learn tensorflow huggingface-hub
 
- ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+ ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 ## Citation
 If you use this work, please cite our paper:
 
