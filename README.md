@@ -18,7 +18,7 @@ Before running the script, install the required dependencies:
 ```bash
 pip install torch transformers pandas tqdm nltk sentence-transformers scikit-learn tensorflow huggingface-hub
 
-
+```bash
 
 
 ## Citation
