@@ -1,4 +1,6 @@
 import os, time, torch
+import sys
+
 from transformers import logging as hfl
 import pandas as pd
 from transformers import pipeline
@@ -7,7 +9,10 @@ from huggingface_hub.utils import disable_progress_bars
 from tqdm import tqdm
 from nltk import word_tokenize
 import re, nltk, ssl
-import sys
+from nltk.tokenize import word_tokenize
+import nltk
+
+nltk.download('punkt_tab')
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 disable_progress_bars()
@@ -32,6 +37,7 @@ else:
 
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
+
 stop = set(nltk.corpus.stopwords.words("arabic"))
 
 substitution_groups = {
@@ -47,6 +53,10 @@ substitution_groups = {
     'ز': ['ر'],
     'ع': ['غ'],
     'غ': ['ع'],
+    'ض': ['ص'],
+    'ه': ['ة'],
+    'ص': ['ض'],
+    'ة': ['ه'],
 }
 
 
@@ -58,11 +68,6 @@ def tokenize(text):
         if token not in tokenized_text:
             tokenized_text.append(token)
     return tokenized_text
-
-
-def simple_word_tokenize(text):
-    from GraphRAG.word_tokerizer import simple_word_tokenize as word_tokenizer
-    return word_tokenizer(text)
 
 
 def clean(text):
@@ -107,26 +112,6 @@ def clean(text):
     return text
 
 
-def mask(text, targeted_word, top_k):
-    import re
-    from transformers import pipeline
-
-    mask_token = '[MASK]'
-    text = re.sub(targeted_word, mask_token, text)
-
-    unmasker = pipeline('fill-mask', model='bert-base-arabertv02', device=device)
-    results = unmasker(text, top_k=top_k)
-
-    synonym_words = []
-    for result in results:
-        try:
-            synonym_words.append(result['token_str'])
-        except TypeError:
-            continue
-
-    return synonym_words
-
-
 def tag(text):
     from transformers import pipeline
     tagger = pipeline('token-classification', model='bert-base-arabic-camelbert-ca-pos-egy', device=device)
@@ -148,14 +133,6 @@ def check(text1, text2):
     similarity = cosine_similarity([encoded_text1], [encoded_text2])[0][0]
 
     return similarity
-
-header_values = ['label','text']
-MSDA = pd.read_csv(r"C:\Users\proam\PycharmProjects\TBD\Data\HARD.csv", encoding="utf-8-sig")
-
-data = pd.concat(
-    [MSDA], axis=0)
-
-print(data.shape, data.columns)
 
 
 def generate_adversarial_dot_based(word, substitution_groups):
@@ -203,8 +180,11 @@ def apply_attack_1(idx_miw, sentences_list, adversarial_examples):
         sentences_list[idx_miw] = adversarial_examples[adv]
         tmp_pos, tmp_neg, tmp_neu = compute_sent(" ".join(sentences_list))
         sentences_list[idx_miw] = replaced_word
+
         differences = compute_differences(base_pos, base_neg, base_neu, tmp_pos, tmp_neg, tmp_neu)
+
         sent_list.append([adv, differences])
+
         if differences > max_diff:
             max_df_pos, max_df_neg, max_df_neu = tmp_pos, tmp_neg, tmp_neu
 
@@ -294,28 +274,20 @@ def find_most_important_vulnerable_word(sentences):
 
     print(f"\n {idx_miw} is the index of the most important word: {miw}\n")
     return idx_miw, miw, sentences_list
-
-
-new_data = []
-for i in tqdm(range(0, len(data["text"])), "The attack progress"):
-    cln_txt = clean(str(data["text"][i]))
-    # base_pos = 0
-    # base_neg = 0
-    # base_neu = 0
-    # max_df_pos = 0
-    # max_df_neg = 0
-    # max_df_neu = 0
+def run_DOT_Attack(inp):
+    cln_txt = clean(inp)
     try:
         temp_cln_txt = cln_txt.split(" ")
         if len(temp_cln_txt) > 10:
-            temp_cln_txt = temp_cln_txt[:11]
+            temp_cln_txt = temp_cln_txt[:]
             cln_txt = " ".join(temp_cln_txt)
 
-        if 5 <= len(cln_txt.split(" ")) <= 10:
+        if 5 <= len(cln_txt.split(" ")):
             idx_first_miw, first_miw, first_sentences_list = find_most_important_vulnerable_word(cln_txt)
 
             # Find second MIW
             first_sentences_list.pop(idx_first_miw)
+
             txt_wo_first_word = " ".join(first_sentences_list)
 
             first_sentences_list.insert(idx_first_miw, first_miw)
@@ -325,12 +297,15 @@ for i in tqdm(range(0, len(data["text"])), "The attack progress"):
             idx_second_miw = first_sentences_list.index(second_miw)
 
             # Find third MIW
+
             first_sentences_list.pop(idx_first_miw)
+
             first_sentences_list.pop(idx_second_miw)
 
             txt_wo_first_second_words = " ".join(first_sentences_list)
 
-            first_sentences_list.insert(idx_first_miw, first_miw)
+            first_sentences_list.insert(idx_first_miw - 1, first_miw)
+
             first_sentences_list.insert(idx_second_miw, second_miw)
 
             _, third_miw, third_sentences_list = find_most_important_vulnerable_word(
@@ -340,7 +315,7 @@ for i in tqdm(range(0, len(data["text"])), "The attack progress"):
 
             print("first sentence:", first_sentences_list, "\n", first_miw, "\t", idx_first_miw)
             print("second sentence:", second_sentences_list, "\n", second_miw, "\t", idx_second_miw)
-            print("second sentence:", third_sentences_list, "\n", third_miw, "\t", idx_third_miw)
+            print("third sentence:", third_sentences_list, "\n", third_miw, "\t", idx_third_miw)
 
             first_adversarial_examples = generate_adversarial_dot_based(first_miw, substitution_groups)
             second_adversarial_examples = generate_adversarial_dot_based(second_miw, substitution_groups)
@@ -348,7 +323,7 @@ for i in tqdm(range(0, len(data["text"])), "The attack progress"):
 
             print(f"\n the first adversarial examples: \t {first_adversarial_examples}")
             print(f"\n the second adversarial examples: \t {second_adversarial_examples}")
-            print(f"\n the second adversarial examples: \t {third_adversarial_examples}")
+            print(f"\n the third adversarial examples: \t {third_adversarial_examples}")
 
             mea1, adv_stm1, _, base_pos, base_neg, base_neu, max_df_pos1, max_df_neg1, max_df_neu1 = apply_attack_1(
                 idx_first_miw,
@@ -367,34 +342,10 @@ for i in tqdm(range(0, len(data["text"])), "The attack progress"):
 
             most_effective_words = mea1 + "," + mea2 + "," + mea3
 
-            new_row = {"original_stm": str(data["text"][i]), "adv_statemant_1": adv_stm1,
-                       "adv_statemant_2": adv_stm2, "adv_statemant_3": adv_stm3,
-                       "most_important_word": first_miw + "," + second_miw + "," + third_miw,
-                       "most_effective_attack": most_effective_words,
-                        'origin_pos': base_pos, 'origin_neg': base_neg,
-                       'origin_nut': base_neu, 'adv_pos_1': max_df_pos1, 'adv_neg_1': max_df_neg1,
-                       'adv_nut_1': max_df_neu1,
-                       'adv_pos_2': max_df_pos2, 'adv_neg_2': max_df_neg2, 'adv_nut_2': max_df_neu2,
-                       'adv_pos_3': max_df_pos3, 'adv_neg_3': max_df_neg3, 'adv_nut_3': max_df_neu3}
-            new_data.append(new_row)
-
-        else:
-            continue
+            print(f"Adv sentence 1: \t {adv_stm1} \n Adv sentence 2 \t {adv_stm2} \n Adv sentence 3 \t {adv_stm3}")
+            print("most_effective_words: \t", most_effective_words)
     except:
+        print("Error occured")
 
-        continue
 
-    print(f"\n number of generated adversarial examples: \t{len(new_data)} \n")
-    if len(new_data) == 10000 or i == len(data["text"]):
-        break
-
-new_data_df = pd.DataFrame(new_data, columns=["original_stm", "adv_statemant_1",
-                                              "adv_statemant_2", "adv_statemant_3",
-                                              "most_important_word",
-                                              "most_effective_attack",'origin_pos', 'origin_neg',
-                                              'origin_nut', 'adv_pos_1', 'adv_neg_1',
-                                              'adv_nut_1',
-                                              'adv_pos_2', 'adv_neg_2', 'adv_nut_2',
-                                              'adv_pos_3', 'adv_neg_3', 'adv_nut_3'])
-new_data_df.to_csv("HARD_adv_3.csv",
-                   encoding='utf-8-sig', index=False)
+run_DOT_Attack("بذلت مجهودا جبارا في محاولة قراءة الكتاب لكنني فشلت القصة غريبة جداً لدرجة أنني توقفت ولم أستطع إكمال القراءة")
