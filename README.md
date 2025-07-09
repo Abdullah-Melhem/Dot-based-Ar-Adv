@@ -17,3 +17,12 @@ Before running the script, install the required dependencies:
 
 ```bash
 pip install torch transformers pandas tqdm nltk sentence-transformers scikit-learn tensorflow huggingface-hub
+
+
+@inproceedings{melhem2025graphrag,
+  title={GraphRAG-based NLP at Risk: Graphemic Dot-Level Adversarial Attack on Arabic Sentiment and LLM Retrieval-Augmented Models},
+  author={Melhem, Abdullah and Aleroud, Ahmed and Albert, Craig},
+  booktitle={Proceedings of the 17th International Conference on Social Networks Analysis and Mining (ASONAM 2025)},
+  year={2025},
+  publisher={IEEE}
+}
