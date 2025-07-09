@@ -18,9 +18,11 @@ This project implements an adversarial attack on Arabic text using NLP technique
 
 Before running the script, install the required dependencies:
 ```bash
-pip install torch transformers pandas tqdm nltk sentence-transformers scikit-learn tensorflow huggingface-hub\\
+pip install torch transformers pandas tqdm nltk sentence-transformers scikit-learn tensorflow huggingface-hub
 
 
+
+```
 ## Citation
 If you use this work, please cite our paper:
 
@@ -32,4 +34,3 @@ If you use this work, please cite our paper:
   year={2025},
   publisher={IEEE}
 }
-```
