@@ -8,7 +8,7 @@ This project implements an adversarial attack on Arabic text using NLP technique
 - **Word Tokenization**: Splits text into individual words.
 - **Most Important Word (MIW) Identification**: Finds the most influential words in a sentence.
 - **Adversarial Word Generation**: Replaces MIWs with visually similar Arabic characters.
-- **Sentiment Analysis**: Computes sentiment scores before and after attack.
+- **Sentiment Analysis**: Computes sentiment scores before and after the attack.
 - **Attack Simulation**: Applies the adversarial attack step-by-step to analyze the impact.
 
 ## Installation
@@ -19,6 +19,8 @@ Before running the script, install the required dependencies:
 pip install torch transformers pandas tqdm nltk sentence-transformers scikit-learn tensorflow huggingface-hub
 
 
+
+##
 @inproceedings{melhem2025graphrag,
   title={GraphRAG-based NLP at Risk: Graphemic Dot-Level Adversarial Attack on Arabic Sentiment and LLM Retrieval-Augmented Models},
   author={Melhem, Abdullah and Aleroud, Ahmed and Albert, Craig},
