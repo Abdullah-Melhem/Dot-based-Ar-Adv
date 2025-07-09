@@ -20,7 +20,7 @@ pip install torch transformers pandas tqdm nltk sentence-transformers scikit-lea
 
 
 
-##
+
 @inproceedings{melhem2025graphrag,
   title={GraphRAG-based NLP at Risk: Graphemic Dot-Level Adversarial Attack on Arabic Sentiment and LLM Retrieval-Augmented Models},
   author={Melhem, Abdullah and Aleroud, Ahmed and Albert, Craig},
